@@ -1,8 +1,8 @@
-package handler
+package coursehandler
 
 import (
 	"net/http"
-	courseModel "online-course-management/internal/course/Model"
+	courseModel "online-course-management/internal/course/model"
 	"online-course-management/internal/course/service"
 	"strconv"
 
@@ -84,20 +84,52 @@ func (h *Handler) Update(c *gin.Context) {
 
 	if err != nil {
 
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid course ID",
+		})
+		return
 	}
 
 	err_rr := c.ShouldBindJSON(&course)
 
 	if err_rr != nil {
-
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid request body",
+		})
+		return
 	}
 	course.ID = uint(id)
-	err_r := h.service.Update(c.Request.Context(), course)
+	err_r := h.service.Update(c.Request.Context(), &course)
 
 	if err_r != nil {
-
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "failed to update course",
+		})
+		return
 	}
 
 	c.JSON(http.StatusOK, course)
 
+}
+
+func (h *Handler) Delete(c *gin.Context) {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil || id == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid course ID",
+		})
+		return
+	}
+
+	if err := h.service.Delete(
+		c.Request.Context(),
+		uint(id),
+	); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "failed to delete course",
+		})
+		return
+	}
+
+	c.Status(http.StatusNoContent)
 }

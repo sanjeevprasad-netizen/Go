@@ -2,7 +2,7 @@ package repository
 
 import (
 	"context"
-	courseModel "online-course-management/internal/course/Model"
+	courseModel "online-course-management/internal/course/model"
 
 	"gorm.io/gorm"
 )
