@@ -1,0 +1,93 @@
+package handler
+
+import (
+	"net/http"
+	courseModel "online-course-management/internal/course/Model"
+	"online-course-management/internal/course/service"
+	"strconv"
+
+	"github.com/gin-gonic/gin"
+)
+
+type Handler struct {
+	service *service.Service
+}
+
+func NewHandler(s *service.Service) *Handler {
+	return &Handler{service: s}
+
+}
+
+func (h *Handler) Create(c *gin.Context) {
+	var course courseModel.Course
+
+	err := c.ShouldBindJSON(&course)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Invalid request body",
+		})
+		return
+	}
+
+	e_rror := h.service.Create(c.Request.Context(), &course)
+
+	if e_rror != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "failed to create",
+		})
+		return
+	}
+
+	c.JSON(http.StatusCreated, course)
+}
+
+func (h *Handler) GetAll(c *gin.Context) {
+	//var courses []courseModel.Cocurse
+
+	courses, err := h.service.GetAll(c.Request.Context())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "failed",
+		})
+		return
+	}
+	c.JSON(http.StatusOK, courses)
+
+}
+
+func (h *Handler) GetById(c *gin.Context) {
+
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid course ID",
+		})
+		return
+	}
+	course, err := h.service.GetById(c.Request.Context(), uint(id))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid course ID",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, course)
+
+}
+
+func (h *Handler) Update(c *gin.Context) {
+	var course courseModel.Course
+	err := c.ShouldBindJSON(&course)
+
+	if err != nil {
+
+	}
+	err_r := h.service.Update(c.Request.Context(), course)
+
+	if err_r != nil {
+
+	}
+
+}
