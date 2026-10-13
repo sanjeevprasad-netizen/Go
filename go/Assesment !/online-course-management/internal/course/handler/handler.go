@@ -79,15 +79,25 @@ func (h *Handler) GetById(c *gin.Context) {
 
 func (h *Handler) Update(c *gin.Context) {
 	var course courseModel.Course
-	err := c.ShouldBindJSON(&course)
+
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 
 	if err != nil {
 
 	}
+
+	err_rr := c.ShouldBindJSON(&course)
+
+	if err_rr != nil {
+
+	}
+	course.ID = uint(id)
 	err_r := h.service.Update(c.Request.Context(), course)
 
 	if err_r != nil {
 
 	}
+
+	c.JSON(http.StatusOK, course)
 
 }
