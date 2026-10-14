@@ -27,7 +27,18 @@ func (r *Repository) GetAll(ctx context.Context) ([]courseModel.Course, error) {
 
 func (r *Repository) GetById(ctx context.Context, id uint) (*courseModel.Course, error) {
 	var c courseModel.Course
-	err := r.db.WithContext(ctx).First(&c, id).Error
+
+	query := "Select* from courses where id=$1"
+	err := r.db.ConnPool.QueryRowContext(ctx, query, id).Scan(
+		&c.ID,
+		&c.Title,
+		&c.Description,
+		&c.DurationInHours,
+		&c.StartDate,
+		&c.Instructor,
+	)
+
+	//err := r.db.WithContext(ctx).First(&c, id).Error
 	if err != nil {
 		return nil, err
 	}
